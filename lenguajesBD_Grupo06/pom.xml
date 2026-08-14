@@ -8,10 +8,10 @@
 		<version>4.1.0</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.lenguajes_grupo6</groupId>
-	<artifactId>demo</artifactId>
+	<groupId>lenguajesBD_Grupo06</groupId>
+	<artifactId>lenguajesBD_Grupo06</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>demo</name>
+	<name>lenguajesBD_Grupo06</name>
 	<description/>
 	<url/>
 	<licenses>
