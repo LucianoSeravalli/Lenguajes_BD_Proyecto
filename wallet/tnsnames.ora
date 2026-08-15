@@ -1,0 +1,12 @@
+adminylenguaje_high = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.us-chicago-1.oraclecloud.com))(connect_data=(service_name=g45a024d435e841_adminylenguaje_high.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+adminylenguaje_medium = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.us-chicago-1.oraclecloud.com))(connect_data=(service_name=g45a024d435e841_adminylenguaje_medium.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+adminylenguaje_low = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.us-chicago-1.oraclecloud.com))(connect_data=(service_name=g45a024d435e841_adminylenguaje_low.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+adminylenguaje_tp = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.us-chicago-1.oraclecloud.com))(connect_data=(service_name=g45a024d435e841_adminylenguaje_tp.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+adminylenguaje_tpurgent = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.us-chicago-1.oraclecloud.com))(connect_data=(service_name=g45a024d435e841_adminylenguaje_tpurgent.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+
+
