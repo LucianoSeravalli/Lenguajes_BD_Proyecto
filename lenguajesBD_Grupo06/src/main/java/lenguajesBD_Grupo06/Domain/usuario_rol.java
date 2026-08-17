@@ -10,10 +10,10 @@ import java.time.LocalDateTime;
  * TRG_USUARIO_ROL_PROTEGER impide retirar un rol si el usuario
  * conserva perfil de cliente o rutinas/clases asignadas (ORA-20012).
  */
-@Entity
+@Entity(name = "UsuarioRol")
 @Table(name = "USUARIO_ROL")
 @Getter @Setter @NoArgsConstructor
-public class Usuario_rol {
+public class usuario_rol {
  
     @EmbeddedId
     private UsuarioRolId id;
@@ -31,7 +31,7 @@ public class Usuario_rol {
     @Column(name = "FECHA_ASIGNACION", insertable = false, updatable = false)
     private LocalDateTime fechaAsignacion;
  
-    public Usuario_rol (Usuario usuario, AppRol rol) {
+    public usuario_rol (Usuario usuario, AppRol rol) {
         this.usuario = usuario;
         this.rol = rol;
         this.id = new UsuarioRolId(usuario.getIdUsuario(), rol.getIdRol());

@@ -11,9 +11,24 @@ import java.util.List;
  
 public interface AccesoRepository extends JpaRepository<Acceso, Long> {
  
-    List<Acceso> findByClienteIdClienteOrderByFechaHoraDesc(Long idCliente);
+    @Query("""
+           SELECT a FROM Acceso a
+           JOIN FETCH a.cliente c
+           JOIN FETCH c.usuario
+           WHERE c.idCliente = :idCliente
+           ORDER BY a.fechaHora DESC
+           """)
+    List<Acceso> findByClienteIdClienteOrderByFechaHoraDesc(@Param("idCliente") Long idCliente);
  
-    List<Acceso> findByFechaHoraBetweenOrderByFechaHoraDesc(LocalDateTime desde, LocalDateTime hasta);
+    @Query("""
+           SELECT a FROM Acceso a
+           JOIN FETCH a.cliente c
+           JOIN FETCH c.usuario
+           WHERE a.fechaHora BETWEEN :desde AND :hasta
+           ORDER BY a.fechaHora DESC
+           """)
+    List<Acceso> findByFechaHoraBetweenOrderByFechaHoraDesc(
+            @Param("desde") LocalDateTime desde, @Param("hasta") LocalDateTime hasta);
  
     @Query("""
            SELECT COUNT(a) FROM Acceso a
@@ -24,4 +39,3 @@ public interface AccesoRepository extends JpaRepository<Acceso, Long> {
                             @Param("desde") LocalDateTime desde,
                             @Param("hasta") LocalDateTime hasta);
 }
- 

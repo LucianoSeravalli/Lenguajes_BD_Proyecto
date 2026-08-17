@@ -11,9 +11,20 @@ import java.util.List;
 /** TRG_CLASE_VALIDAR_ENTRENADOR rechaza con ORA-20010 si el usuario no es entrenador activo. */
 public interface ClaseRepository extends JpaRepository<Clase, Long> {
  
-    List<Clase> findByDiaSemanaOrderByHoraInicio(String diaSemana);
+    @Query("""
+           SELECT c FROM Clase c
+           JOIN FETCH c.entrenador
+           WHERE c.diaSemana = :diaSemana
+           ORDER BY c.horaInicio
+           """)
+    List<Clase> findByDiaSemanaOrderByHoraInicio(@Param("diaSemana") String diaSemana);
  
-    List<Clase> findByEntrenadorIdUsuario(Long idEntrenador);
+    @Query("""
+           SELECT c FROM Clase c
+           JOIN FETCH c.entrenador
+           WHERE c.entrenador.idUsuario = :idEntrenador
+           """)
+    List<Clase> findByEntrenadorIdUsuario(@Param("idEntrenador") Long idEntrenador);
  
     /**
      * Detecta choques de horario del mismo entrenador antes de guardar la clase.

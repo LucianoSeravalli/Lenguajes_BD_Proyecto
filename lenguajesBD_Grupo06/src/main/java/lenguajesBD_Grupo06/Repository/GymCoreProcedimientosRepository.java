@@ -1,7 +1,7 @@
 
 package lenguajesBD_Grupo06.Repository;
 
-import exception.GymCoreException;
+import lenguajesBD_Grupo06.exception.GymCoreException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
  

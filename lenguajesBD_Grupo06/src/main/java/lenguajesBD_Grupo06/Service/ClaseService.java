@@ -2,7 +2,7 @@ package lenguajesBD_Grupo06.Service;
 
 import lenguajesBD_Grupo06.Domain.Clase;
 import lenguajesBD_Grupo06.Domain.Usuario;
-import exception.GymCoreException;
+import lenguajesBD_Grupo06.exception.GymCoreException;
 import lenguajesBD_Grupo06.Repository.ClaseRepository;
 import lenguajesBD_Grupo06.Repository.GymCoreProcedimientosRepository;
 import lenguajesBD_Grupo06.Repository.UsuarioRepository;

@@ -2,7 +2,7 @@ package lenguajesBD_Grupo06.Service;
 
 
 import lenguajesBD_Grupo06.Domain.Reserva;
-import exception.GymCoreException;
+import lenguajesBD_Grupo06.exception.GymCoreException;
 import lenguajesBD_Grupo06.Repository.GymCoreProcedimientosRepository;
 import lenguajesBD_Grupo06.Repository.ReservaRepository;
 import org.springframework.stereotype.Service;

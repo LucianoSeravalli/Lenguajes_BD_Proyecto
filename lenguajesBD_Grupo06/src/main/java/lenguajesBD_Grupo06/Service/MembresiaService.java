@@ -3,7 +3,7 @@ package lenguajesBD_Grupo06.Service;
 import lenguajesBD_Grupo06.Domain.Cliente;
 import lenguajesBD_Grupo06.Domain.Membresia;
 import lenguajesBD_Grupo06.Domain.TipoMembresia;
-import exception.GymCoreException;
+import lenguajesBD_Grupo06.exception.GymCoreException;
 import lenguajesBD_Grupo06.Repository.ClienteRepository;
 import lenguajesBD_Grupo06.Repository.MembresiaRepository;
 import lenguajesBD_Grupo06.Repository.TipoMembresiaRepository;

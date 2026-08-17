@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Inicio')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header('inicio')}"></header>
+<div th:replace="~{fragments/layout :: avisos}"></div>
+
+<main class="container-fluid px-4 py-4">
+
+  <h1 class="h4 mb-1">Panel general</h1>
+  <p class="text-secondary mb-4">Resumen operativo de la cadena GymCore.</p>
+
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+      <div class="gym-panel gym-tarjeta-metrica">
+        <div class="gym-metrica-valor" id="mClientes">&mdash;</div>
+        <div class="gym-metrica-titulo">Clientes activos</div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="gym-panel gym-tarjeta-metrica">
+        <div class="gym-metrica-valor" id="mClases">&mdash;</div>
+        <div class="gym-metrica-titulo">Clases programadas</div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="gym-panel gym-tarjeta-metrica">
+        <div class="gym-metrica-valor" id="mPorVencer">&mdash;</div>
+        <div class="gym-metrica-titulo">Membresias por vencer</div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="gym-panel gym-tarjeta-metrica">
+        <div class="gym-metrica-valor" id="mDenegados">&mdash;</div>
+        <div class="gym-metrica-titulo">Accesos denegados hoy</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-7">
+      <section class="gym-panel">
+        <div class="gym-panel-cabecera">
+          <span><i class="bi bi-clock-history me-2"></i>Accesos de hoy</span>
+          <a class="btn btn-sm btn-gym-outline" th:href="@{/recepcion}">Ir a recepcion</a>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-borderless mb-0">
+            <thead>
+              <tr><th>Hora</th><th>Cliente</th><th>Tipo</th><th>Resultado</th></tr>
+            </thead>
+            <tbody id="tablaAccesos"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <div class="col-lg-5">
+      <section class="gym-panel">
+        <div class="gym-panel-cabecera">
+          <span><i class="bi bi-exclamation-circle me-2"></i>Vencen en 7 dias</span>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-borderless mb-0">
+            <thead><tr><th>Cliente</th><th>Tipo</th><th>Vence</th></tr></thead>
+            <tbody id="tablaPorVencer"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </div>
+
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+
+  try {
+    const clientes = await api.get('/clientes');
+    document.getElementById('mClientes').textContent = clientes.length;
+  } catch (e) { avisar(e.message, 'error'); }
+
+  try {
+    const clases = await api.get('/clases');
+    document.getElementById('mClases').textContent = clases.length;
+  } catch (e) { /* ya avisado arriba si la base esta caida */ }
+
+  try {
+    const porVencer = await api.get('/membresias/por-vencer?dias=7');
+    document.getElementById('mPorVencer').textContent = porVencer.length;
+
+    const tbody = document.getElementById('tablaPorVencer');
+    if (!porVencer.length) return filaVacia(tbody, 3, 'Ninguna vence esta semana.');
+    tbody.innerHTML = porVencer.map(m => `
+      <tr>
+        <td>#${m.idCliente}</td>
+        <td>${limpio(m.tipo)}</td>
+        <td>${fecha(m.fechaFin)}</td>
+      </tr>`).join('');
+  } catch (e) { /* silencioso */ }
+
+  try {
+    const hoy = new Date().toISOString().slice(0, 10);
+    const denegados = await api.get(`/accesos/denegados?desde=${hoy}&hasta=${hoy}`);
+    document.getElementById('mDenegados').textContent = denegados;
+
+    const accesos = await api.get('/accesos/dia');
+    const tbody = document.getElementById('tablaAccesos');
+    if (!accesos.length) return filaVacia(tbody, 4, 'Aun no hay movimientos hoy.');
+    tbody.innerHTML = accesos.map(a => `
+      <tr>
+        <td>${fechaHora(a.fechaHora)}</td>
+        <td>${limpio(a.cliente)}</td>
+        <td>${limpio(a.tipo)}</td>
+        <td>${chip(a.resultado)}</td>
+      </tr>`).join('');
+  } catch (e) { /* silencioso */ }
+
+});
+</script>
+</body>
+</html>

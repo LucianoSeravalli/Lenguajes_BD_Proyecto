@@ -12,7 +12,13 @@ import java.util.Optional;
  
 public interface MembresiaRepository extends JpaRepository<Membresia, Long> {
  
-    List<Membresia> findByClienteIdClienteOrderByFechaFinDesc(Long idCliente);
+    @Query("""
+           SELECT m FROM Membresia m
+           JOIN FETCH m.tipoMembresia
+           WHERE m.cliente.idCliente = :idCliente
+           ORDER BY m.fechaFin DESC
+           """)
+    List<Membresia> findByClienteIdClienteOrderByFechaFinDesc(@Param("idCliente") Long idCliente);
  
     /**
      * Membresia dentro de su rango de fechas y no cancelada. No comprueba pagos:
@@ -20,6 +26,7 @@ public interface MembresiaRepository extends JpaRepository<Membresia, Long> {
      */
     @Query("""
            SELECT m FROM Membresia m
+           JOIN FETCH m.tipoMembresia
            WHERE m.cliente.idCliente = :idCliente
              AND m.estado <> 'cancelada'
              AND m.fechaInicio <= :hoy

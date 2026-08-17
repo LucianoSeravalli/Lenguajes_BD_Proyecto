@@ -16,11 +16,18 @@ import java.util.List;
  */
 public interface PagoRepository extends JpaRepository<Pago, Long> {
  
-    List<Pago> findByMembresiaIdMembresiaOrderByFechaPagoDesc(Long idMembresia);
+    @Query("""
+           SELECT p FROM Pago p
+           JOIN FETCH p.membresia
+           WHERE p.membresia.idMembresia = :idMembresia
+           ORDER BY p.fechaPago DESC
+           """)
+    List<Pago> findByMembresiaIdMembresiaOrderByFechaPagoDesc(@Param("idMembresia") Long idMembresia);
  
     @Query("""
            SELECT p FROM Pago p
-           WHERE p.membresia.cliente.idCliente = :idCliente
+           JOIN FETCH p.membresia m
+           WHERE m.cliente.idCliente = :idCliente
            ORDER BY p.fechaPago DESC
            """)
     List<Pago> findHistorialPorCliente(@Param("idCliente") Long idCliente);

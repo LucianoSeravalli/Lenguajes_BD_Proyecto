@@ -10,7 +10,7 @@ import lombok.*;
  */
 @Entity
 @Table(name = "RUTINA")
-@Getter @Setter @NoArgsConstructor
+@Data
 public class Rutina {
  
     @Id

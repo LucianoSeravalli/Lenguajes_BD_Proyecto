@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Clientes')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header('clientes')}"></header>
+<div th:replace="~{fragments/layout :: avisos}"></div>
+
+<main class="container-fluid px-4 py-4">
+
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+    <div>
+      <h1 class="h4 mb-1">Clientes</h1>
+      <p class="text-secondary mb-0">Registro y consulta de miembros activos.</p>
+    </div>
+    <button class="btn btn-gym" data-bs-toggle="modal" data-bs-target="#modalCliente">
+      <i class="bi bi-person-plus"></i> Nuevo cliente
+    </button>
+  </div>
+
+  <section class="gym-panel">
+    <div class="gym-panel-cabecera">
+      <span><i class="bi bi-people me-2"></i>Activos</span>
+      <input class="form-control form-control-sm w-auto" id="buscar"
+             placeholder="Filtrar por nombre o cedula">
+    </div>
+    <div class="table-responsive">
+      <table class="table table-borderless mb-0">
+        <thead>
+          <tr><th>#</th><th>Nombre</th><th>Cedula</th><th>Correo</th>
+              <th>Telefono</th><th>Estado</th><th></th></tr>
+        </thead>
+        <tbody id="tablaClientes"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Detalle: membresias, pagos y accesos del cliente seleccionado -->
+  <section class="gym-panel mt-3 d-none" id="panelDetalle">
+    <div class="gym-panel-cabecera">
+      <span id="detalleTitulo">Detalle</span>
+      <button class="btn btn-sm btn-gym-outline" id="cerrarDetalle">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+    <div class="gym-panel-cuerpo">
+      <ul class="nav nav-tabs mb-3" role="tablist">
+        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab"
+            data-bs-target="#tabMembresias">Membresias</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab"
+            data-bs-target="#tabPagos">Pagos</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab"
+            data-bs-target="#tabAccesos">Accesos</button></li>
+      </ul>
+      <div class="tab-content">
+        <div class="tab-pane fade show active" id="tabMembresias">
+          <table class="table table-borderless mb-0">
+            <thead><tr><th>Tipo</th><th>Inicio</th><th>Fin</th><th>Estado</th></tr></thead>
+            <tbody id="tablaMembresias"></tbody>
+          </table>
+        </div>
+        <div class="tab-pane fade" id="tabPagos">
+          <table class="table table-borderless mb-0">
+            <thead><tr><th>Fecha</th><th>Monto</th><th>Metodo</th><th>Estado</th></tr></thead>
+            <tbody id="tablaPagos"></tbody>
+          </table>
+        </div>
+        <div class="tab-pane fade" id="tabAccesos">
+          <table class="table table-borderless mb-0">
+            <thead><tr><th>Fecha</th><th>Tipo</th><th>Resultado</th></tr></thead>
+            <tbody id="tablaAccesosCliente"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Alta de cliente: POST /api/auth/registro/cliente -->
+<div class="modal fade" id="modalCliente" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content gym-panel">
+      <div class="gym-panel-cabecera">
+        <span>Nuevo cliente</span>
+        <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="formCliente" class="gym-panel-cuerpo" autocomplete="off">
+        <div class="row g-3">
+          <div class="col-6">
+            <label class="form-label">Nombre</label>
+            <input class="form-control" name="nombre" required maxlength="50">
+          </div>
+          <div class="col-6">
+            <label class="form-label">Apellido</label>
+            <input class="form-control" name="apellido" required maxlength="50">
+          </div>
+          <div class="col-6">
+            <label class="form-label">Cedula</label>
+            <input class="form-control" name="cedula" required maxlength="20"
+                   placeholder="1-1111-1111">
+          </div>
+          <div class="col-6">
+            <label class="form-label">Telefono</label>
+            <input class="form-control" name="telefono" maxlength="20">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Correo</label>
+            <input class="form-control" type="email" name="correo" required maxlength="150">
+          </div>
+          <div class="col-6">
+            <label class="form-label">Contrasena</label>
+            <input class="form-control" type="password" name="password" required minlength="8">
+          </div>
+          <div class="col-6">
+            <label class="form-label">Fecha de nacimiento</label>
+            <input class="form-control" type="date" name="fechaNacimiento">
+          </div>
+        </div>
+        <button class="btn btn-gym w-100 mt-4" type="submit">Registrar</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+
+<script>
+let clientes = [];
+
+function pintarClientes(lista) {
+  const tbody = document.getElementById('tablaClientes');
+  if (!lista.length) return filaVacia(tbody, 7, 'No hay clientes activos.');
+
+  tbody.innerHTML = lista.map(c => `
+    <tr>
+      <td class="text-secondary">${c.idCliente}</td>
+      <td>${limpio(c.nombre)} ${limpio(c.apellido)}</td>
+      <td>${limpio(c.cedula)}</td>
+      <td class="text-secondary">${limpio(c.correo)}</td>
+      <td>${limpio(c.telefono) || '\u2014'}</td>
+      <td>${chip(c.estado)}</td>
+      <td class="text-end">
+        <button class="btn btn-sm btn-gym-outline" data-ver="${c.idCliente}"
+                data-nombre="${limpio(c.nombre)} ${limpio(c.apellido)}">
+          <i class="bi bi-eye"></i>
+        </button>
+      </td>
+    </tr>`).join('');
+}
+
+async function cargarClientes() {
+  try {
+    clientes = await api.get('/clientes');
+    pintarClientes(clientes);
+  } catch (e) {
+    filaVacia(document.getElementById('tablaClientes'), 7, e.message);
+  }
+}
+
+document.getElementById('buscar').addEventListener('input', (ev) => {
+  const texto = ev.target.value.toLowerCase();
+  pintarClientes(clientes.filter(c =>
+    (c.nombre + ' ' + c.apellido + ' ' + c.cedula).toLowerCase().includes(texto)));
+});
+
+document.getElementById('tablaClientes').addEventListener('click', async (ev) => {
+  const boton = ev.target.closest('[data-ver]');
+  if (!boton) return;
+  await abrirDetalle(boton.dataset.ver, boton.dataset.nombre);
+});
+
+async function abrirDetalle(idCliente, nombre) {
+  document.getElementById('panelDetalle').classList.remove('d-none');
+  document.getElementById('detalleTitulo').textContent = 'Detalle de ' + nombre;
+
+  try {
+    const membresias = await api.get('/membresias/cliente/' + idCliente);
+    const tb = document.getElementById('tablaMembresias');
+    membresias.length
+      ? tb.innerHTML = membresias.map(m => `
+          <tr><td>${limpio(m.tipo)}</td><td>${fecha(m.fechaInicio)}</td>
+              <td>${fecha(m.fechaFin)}</td><td>${chip(m.estado)}</td></tr>`).join('')
+      : filaVacia(tb, 4, 'Sin membresias.');
+  } catch (e) { avisar(e.message, 'error'); }
+
+  try {
+    const pagos = await api.get('/pagos/cliente/' + idCliente);
+    const tb = document.getElementById('tablaPagos');
+    pagos.length
+      ? tb.innerHTML = pagos.map(p => `
+          <tr><td>${fecha(p.fechaPago)}</td><td>${colones(p.monto)}</td>
+              <td>${limpio(p.metodoPago)}</td><td>${chip(p.estado)}</td></tr>`).join('')
+      : filaVacia(tb, 4, 'Sin pagos.');
+  } catch (e) { avisar(e.message, 'error'); }
+
+  try {
+    const accesos = await api.get('/accesos/cliente/' + idCliente);
+    const tb = document.getElementById('tablaAccesosCliente');
+    accesos.length
+      ? tb.innerHTML = accesos.map(a => `
+          <tr><td>${fechaHora(a.fechaHora)}</td><td>${limpio(a.tipo)}</td>
+              <td>${chip(a.resultado)}</td></tr>`).join('')
+      : filaVacia(tb, 3, 'Sin accesos registrados.');
+  } catch (e) { avisar(e.message, 'error'); }
+}
+
+document.getElementById('cerrarDetalle').addEventListener('click',
+  () => document.getElementById('panelDetalle').classList.add('d-none'));
+
+document.getElementById('formCliente').addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  try {
+    const r = await api.post('/auth/registro/cliente', datosDe(ev.target));
+    avisar(r.mensaje, 'ok');
+    ev.target.reset();
+    bootstrap.Modal.getInstance(document.getElementById('modalCliente')).hide();
+    cargarClientes();
+  } catch (e) { avisar(e.message, 'error'); }
+});
+
+document.addEventListener('DOMContentLoaded', cargarClientes);
+</script>
+</body>
+</html>
