@@ -11,12 +11,20 @@ import java.util.List;
  
 public interface RutinaClienteRepository extends JpaRepository<RutinaCliente, Long> {
  
-    List<RutinaCliente> findByClienteIdClienteOrderByFechaAsignacionDesc(Long idCliente);
+    @Query("""
+           SELECT rc FROM RutinaCliente rc
+           JOIN FETCH rc.rutina
+           WHERE rc.cliente.idCliente = :idCliente
+           ORDER BY rc.fechaAsignacion DESC
+           """)
+    List<RutinaCliente> findByClienteIdClienteOrderByFechaAsignacionDesc(
+            @Param("idCliente") Long idCliente);
  
     /** Asignaciones sin fecha de fin o cuya vigencia no ha terminado. */
     @Query("""
            SELECT rc FROM RutinaCliente rc
-           JOIN FETCH rc.rutina
+           JOIN FETCH rc.rutina r
+           JOIN FETCH r.entrenador
            WHERE rc.cliente.idCliente = :idCliente
              AND (rc.fechaFin IS NULL OR rc.fechaFin >= :hoy)
            """)
@@ -26,4 +34,3 @@ public interface RutinaClienteRepository extends JpaRepository<RutinaCliente, Lo
         return findVigentes(idCliente, LocalDate.now());
     }
 }
- 
