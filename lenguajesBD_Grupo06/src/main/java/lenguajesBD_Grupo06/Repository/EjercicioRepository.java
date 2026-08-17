@@ -1,13 +1,14 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Interface.java to edit this template
- */
 package lenguajesBD_Grupo06.Repository;
 
-/**
- *
- * @author serav
- */
-public interface EjercicioRepository {
-    
+import lenguajesBD_Grupo06.Domain.Ejercicio;
+import org.springframework.data.jpa.repository.JpaRepository;
+ 
+import java.util.List;
+ 
+public interface EjercicioRepository extends JpaRepository<Ejercicio, Long> {
+ 
+    List<Ejercicio> findByGrupoMuscularIgnoreCase(String grupoMuscular);
+ 
+    List<Ejercicio> findByNombreContainingIgnoreCase(String texto);
 }
+ 
