@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Crear cuenta')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header('')}"></header>
+<div th:replace="~{fragments/layout :: avisos}"></div>
+
+<main class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-7">
+
+      <section class="gym-panel">
+        <div class="gym-panel-cabecera">
+          <span><i class="bi bi-person-plus me-2"></i>Crear cuenta de cliente</span>
+        </div>
+        <div class="gym-panel-cuerpo">
+
+          <form id="formRegistro" autocomplete="off">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Nombre</label>
+                <input class="form-control" name="nombre" required maxlength="50" autofocus>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Apellido</label>
+                <input class="form-control" name="apellido" required maxlength="50">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Cedula</label>
+                <input class="form-control" name="cedula" required maxlength="20"
+                       placeholder="1-1111-1111">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Telefono</label>
+                <input class="form-control" name="telefono" maxlength="20"
+                       placeholder="8888-0000">
+              </div>
+              <div class="col-12">
+                <label class="form-label">Correo</label>
+                <input class="form-control" type="email" name="correo" required maxlength="150">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Contrasena</label>
+                <input class="form-control" type="password" name="password"
+                       required minlength="8">
+                <div class="form-text text-secondary">Minimo 8 caracteres.</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Fecha de nacimiento</label>
+                <input class="form-control" type="date" name="fechaNacimiento">
+              </div>
+            </div>
+
+            <button class="btn btn-gym w-100 mt-4" type="submit">
+              <i class="bi bi-check2-circle"></i> Crear cuenta
+            </button>
+          </form>
+
+          <div class="text-center mt-3">
+            <a class="text-secondary small" th:href="@{/login}">
+              Ya tengo cuenta, quiero ingresar
+            </a>
+          </div>
+
+        </div>
+      </section>
+
+      <p class="text-secondary small mt-3 mb-0">
+        La contrasena se guarda como hash BCrypt en <code>PASSWORD_HASH</code>.
+        El registro crea el USUARIO, le asigna el rol CLIENTE y luego el perfil
+        en CLIENTE, en ese orden, porque <code>TRG_CLIENTE_VALIDAR_ROL</code>
+        exige que el rol exista antes.
+      </p>
+
+    </div>
+  </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+
+<script>
+document.getElementById('formRegistro').addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const boton = ev.target.querySelector('button[type=submit]');
+  boton.disabled = true;
+
+  try {
+    const r = await api.post('/auth/registro/cliente', datosDe(ev.target));
+    avisar(r.mensaje, 'ok');
+    ev.target.reset();
+    setTimeout(() => window.location.href = '/login', 1500);
+  } catch (e) {
+    // 409 si la cedula o el correo ya existen.
+    avisar(e.message, 'error');
+  } finally {
+    boton.disabled = false;
+  }
+});
+</script>
+</body>
+</html>

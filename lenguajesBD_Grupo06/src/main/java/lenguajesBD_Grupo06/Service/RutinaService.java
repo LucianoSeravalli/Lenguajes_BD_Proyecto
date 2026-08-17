@@ -1,7 +1,7 @@
 package lenguajesBD_Grupo06.Service;
 
 import lenguajesBD_Grupo06.Domain.*;
-import exception.GymCoreException;
+import lenguajesBD_Grupo06.exception.GymCoreException;
 import lenguajesBD_Grupo06.Repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

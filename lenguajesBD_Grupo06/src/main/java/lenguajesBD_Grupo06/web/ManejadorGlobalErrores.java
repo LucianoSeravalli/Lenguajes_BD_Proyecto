@@ -1,5 +1,5 @@
 package lenguajesBD_Grupo06.web;
-import exception.GymCoreException;
+import lenguajesBD_Grupo06.exception.GymCoreException;
 import lenguajesBD_Grupo06.web.dto.Responses;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;

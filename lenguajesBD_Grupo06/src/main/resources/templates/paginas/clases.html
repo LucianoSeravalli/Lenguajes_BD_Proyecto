@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Clases')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header('clases')}"></header>
+<div th:replace="~{fragments/layout :: avisos}"></div>
+
+<main class="container-fluid px-4 py-4">
+
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+    <div>
+      <h1 class="h4 mb-1">Clases y reservas</h1>
+      <p class="text-secondary mb-0">
+        Las reservas pasan por <code>SP_RESERVAR_CLASE</code>, que bloquea la clase
+        para evitar sobre-reservas simultaneas.
+      </p>
+    </div>
+    <button class="btn btn-gym" data-bs-toggle="modal" data-bs-target="#modalClase">
+      <i class="bi bi-plus-lg"></i> Nueva clase
+    </button>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-8">
+      <section class="gym-panel">
+        <div class="gym-panel-cabecera"><i class="bi bi-calendar-week me-2"></i>Horario semanal</div>
+        <div class="table-responsive">
+          <table class="table table-borderless mb-0">
+            <thead>
+              <tr><th>Dia</th><th>Hora</th><th>Clase</th><th>Entrenador</th>
+                  <th>Cupos</th><th></th></tr>
+            </thead>
+            <tbody id="tablaClases"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <div class="col-lg-4">
+      <section class="gym-panel">
+        <div class="gym-panel-cabecera"><i class="bi bi-bookmark-plus me-2"></i>Reservar</div>
+        <div class="gym-panel-cuerpo">
+          <form id="formReserva" autocomplete="off">
+            <label class="form-label">Cedula del cliente</label>
+            <input class="form-control mb-3" name="cedula" required placeholder="1-1111-1111">
+
+            <label class="form-label">Clase</label>
+            <select class="form-select mb-3" name="idClase" id="selectClase" required></select>
+
+            <button class="btn btn-gym w-100" type="submit">
+              <i class="bi bi-check2-circle"></i> Confirmar reserva
+            </button>
+          </form>
+
+          <hr class="my-4" style="border-color: var(--gym-borde)">
+          <p class="text-secondary small mb-0">
+            Si el cliente no tiene membresia al dia responde 409 con el mensaje
+            del error ORA-20002. Cupo lleno: ORA-20004. Reserva repetida: ORA-20005.
+          </p>
+        </div>
+      </section>
+    </div>
+  </div>
+
+</main>
+
+<div class="modal fade" id="modalClase" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content gym-panel">
+      <div class="gym-panel-cabecera">
+        <span>Nueva clase</span>
+        <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="formClase" class="gym-panel-cuerpo" autocomplete="off">
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label">Nombre</label>
+            <input class="form-control" name="nombre" required maxlength="60">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Descripcion</label>
+            <input class="form-control" name="descripcion" maxlength="300">
+          </div>
+          <div class="col-8">
+            <label class="form-label">Entrenador</label>
+            <select class="form-select" name="idEntrenador" id="selectEntrenador" required></select>
+          </div>
+          <div class="col-4">
+            <label class="form-label">Cupo</label>
+            <input class="form-control" type="number" name="cupoMaximo" min="1" value="15" required>
+          </div>
+          <div class="col-4">
+            <label class="form-label">Dia</label>
+            <select class="form-select" name="diaSemana" required>
+              <option>lunes</option><option>martes</option><option>miercoles</option>
+              <option>jueves</option><option>viernes</option><option>sabado</option>
+              <option>domingo</option>
+            </select>
+          </div>
+          <div class="col-4">
+            <label class="form-label">Inicio</label>
+            <input class="form-control" type="time" name="horaInicio" required>
+          </div>
+          <div class="col-4">
+            <label class="form-label">Fin</label>
+            <input class="form-control" type="time" name="horaFin" required>
+          </div>
+        </div>
+        <button class="btn btn-gym w-100 mt-4" type="submit">Guardar</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+
+<script>
+async function cargarClases() {
+  const tbody = document.getElementById('tablaClases');
+  const select = document.getElementById('selectClase');
+  try {
+    const clases = await api.get('/clases');
+    if (!clases.length) {
+      select.innerHTML = '<option value="">Sin clases</option>';
+      return filaVacia(tbody, 6, 'No hay clases programadas.');
+    }
+
+    tbody.innerHTML = clases.map(c => {
+      const lleno = c.cuposDisponibles <= 0;
+      return `
+      <tr>
+        <td class="text-capitalize">${limpio(c.diaSemana)}</td>
+        <td>${limpio(c.horaInicio)} - ${limpio(c.horaFin)}</td>
+        <td>${limpio(c.nombre)}</td>
+        <td class="text-secondary">${limpio(c.entrenador)}</td>
+        <td>
+          <span class="gym-chip ${lleno ? 'cancelada' : 'activa'}">
+            ${c.cuposDisponibles} / ${c.cupoMaximo}
+          </span>
+        </td>
+        <td class="text-end">
+          <button class="btn btn-sm btn-gym-outline" data-asistentes="${c.idClase}">
+            <i class="bi bi-people"></i>
+          </button>
+        </td>
+      </tr>`;
+    }).join('');
+
+    select.innerHTML = clases.map(c =>
+      `<option value="${c.idClase}">${limpio(c.nombre)} — ${limpio(c.diaSemana)} ${limpio(c.horaInicio)} (${c.cuposDisponibles} libres)</option>`
+    ).join('');
+
+  } catch (e) { filaVacia(tbody, 6, e.message); }
+}
+
+async function cargarEntrenadores() {
+  try {
+    const entrenadores = await api.get('/auth/entrenadores');
+    document.getElementById('selectEntrenador').innerHTML = entrenadores.map(e =>
+      `<option value="${e.idUsuario}">${limpio(e.nombre)} ${limpio(e.apellido)}` +
+      `${e.especialidad ? ' — ' + limpio(e.especialidad) : ''}</option>`).join('');
+  } catch (e) { avisar(e.message, 'error'); }
+}
+
+document.getElementById('formReserva').addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const datos = datosDe(ev.target);
+  datos.idClase = Number(datos.idClase);
+  try {
+    const r = await api.post('/reservas', datos);
+    avisar(r.mensaje, 'ok');
+    ev.target.reset();
+    cargarClases();
+  } catch (e) { avisar(e.message, 'error'); }
+});
+
+document.getElementById('formClase').addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const datos = datosDe(ev.target);
+  datos.idEntrenador = Number(datos.idEntrenador);
+  datos.cupoMaximo = Number(datos.cupoMaximo);
+  try {
+    await api.post('/clases', datos);
+    avisar('Clase creada.', 'ok');
+    ev.target.reset();
+    bootstrap.Modal.getInstance(document.getElementById('modalClase')).hide();
+    cargarClases();
+  } catch (e) { avisar(e.message, 'error'); }
+});
+
+document.getElementById('tablaClases').addEventListener('click', async (ev) => {
+  const boton = ev.target.closest('[data-asistentes]');
+  if (!boton) return;
+  try {
+    const reservas = await api.get(`/clases/${boton.dataset.asistentes}/reservas`);
+    avisar(reservas.length
+      ? `${reservas.length} reserva(s) confirmada(s).`
+      : 'Nadie ha reservado esta clase.', 'info');
+  } catch (e) { avisar(e.message, 'error'); }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  cargarClases();
+  cargarEntrenadores();
+});
+</script>
+</body>
+</html>

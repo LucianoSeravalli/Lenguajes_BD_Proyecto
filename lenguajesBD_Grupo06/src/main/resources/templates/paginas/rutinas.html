@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Rutinas')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header('rutinas')}"></header>
+<div th:replace="~{fragments/layout :: avisos}"></div>
+
+<main class="container-fluid px-4 py-4">
+
+  <h1 class="h4 mb-1">Rutinas de entrenamiento</h1>
+  <p class="text-secondary mb-4">
+    Solo usuarios con rol ENTRENADOR activo pueden crear rutinas: lo valida
+    <code>TRG_RUTINA_VALIDAR_ENTRENADOR</code>.
+  </p>
+
+  <div class="row g-3">
+    <div class="col-lg-4">
+      <section class="gym-panel mb-3">
+        <div class="gym-panel-cabecera"><i class="bi bi-plus-square me-2"></i>Nueva rutina</div>
+        <div class="gym-panel-cuerpo">
+          <form id="formRutina" autocomplete="off">
+            <label class="form-label">Nombre</label>
+            <input class="form-control mb-3" name="nombre" required maxlength="60">
+
+            <label class="form-label">Nivel</label>
+            <select class="form-select mb-3" name="nivel" required>
+              <option value="principiante">Principiante</option>
+              <option value="intermedio">Intermedio</option>
+              <option value="avanzado">Avanzado</option>
+            </select>
+
+            <label class="form-label">Entrenador</label>
+            <select class="form-select mb-3" name="idEntrenador" id="selectEntrenador" required></select>
+
+            <button class="btn btn-gym w-100" type="submit">Crear</button>
+          </form>
+        </div>
+      </section>
+
+      <section class="gym-panel">
+        <div class="gym-panel-cabecera"><i class="bi bi-person-check me-2"></i>Asignar a cliente</div>
+        <div class="gym-panel-cuerpo">
+          <form id="formAsignar" autocomplete="off">
+            <label class="form-label">Rutina</label>
+            <select class="form-select mb-3" name="idRutina" id="selectRutina" required></select>
+
+            <label class="form-label">Cliente</label>
+            <select class="form-select mb-3" name="idCliente" id="selectCliente" required></select>
+
+            <label class="form-label">Vigente hasta (opcional)</label>
+            <input class="form-control mb-3" type="date" name="fechaFin">
+
+            <button class="btn btn-gym w-100" type="submit">Asignar</button>
+          </form>
+        </div>
+      </section>
+    </div>
+
+    <div class="col-lg-8">
+      <section class="gym-panel">
+        <div class="gym-panel-cabecera">
+          <span><i class="bi bi-clipboard-pulse me-2"></i>Rutinas por entrenador</span>
+          <select class="form-select form-select-sm w-auto" id="filtroEntrenador"></select>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-borderless mb-0">
+            <thead><tr><th>#</th><th>Nombre</th><th>Nivel</th><th>Entrenador</th><th></th></tr></thead>
+            <tbody id="tablaRutinas"></tbody>
+          </table>
+        </div>
+        <div class="gym-panel-cuerpo border-top d-none" id="panelDetalle"
+             style="border-color: var(--gym-borde) !important;">
+          <h6 class="mb-3" id="detalleTitulo">Ejercicios</h6>
+          <table class="table table-borderless mb-0">
+            <thead>
+              <tr><th>Ejercicio</th><th>Grupo</th><th>Series</th>
+                  <th>Reps</th><th>Descanso</th></tr>
+            </thead>
+            <tbody id="tablaEjercicios"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </div>
+
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+
+<script>
+let entrenadores = [];
+
+async function cargarEntrenadores() {
+  try {
+    entrenadores = await api.get('/auth/entrenadores');
+    const opciones = entrenadores.map(e =>
+      `<option value="${e.idUsuario}">${limpio(e.nombre)} ${limpio(e.apellido)}</option>`).join('');
+    document.getElementById('selectEntrenador').innerHTML = opciones;
+    document.getElementById('filtroEntrenador').innerHTML = opciones;
+    if (entrenadores.length) cargarRutinas();
+  } catch (e) { avisar(e.message, 'error'); }
+}
+
+async function cargarClientes() {
+  try {
+    const clientes = await api.get('/clientes');
+    document.getElementById('selectCliente').innerHTML = clientes.map(c =>
+      `<option value="${c.idCliente}">${limpio(c.nombre)} ${limpio(c.apellido)}</option>`).join('');
+  } catch (e) { avisar(e.message, 'error'); }
+}
+
+async function cargarRutinas() {
+  const id = document.getElementById('filtroEntrenador').value;
+  const tbody = document.getElementById('tablaRutinas');
+  if (!id) return filaVacia(tbody, 5, 'Seleccione un entrenador.');
+
+  try {
+    const rutinas = await api.get('/rutinas/entrenador/' + id);
+    if (!rutinas.length) {
+      document.getElementById('selectRutina').innerHTML = '<option value="">Sin rutinas</option>';
+      return filaVacia(tbody, 5, 'Este entrenador no tiene rutinas.');
+    }
+
+    tbody.innerHTML = rutinas.map(r => `
+      <tr>
+        <td class="text-secondary">${r.idRutina}</td>
+        <td>${limpio(r.nombre)}</td>
+        <td class="text-capitalize">${limpio(r.nivel)}</td>
+        <td class="text-secondary">${limpio(r.entrenador)}</td>
+        <td class="text-end">
+          <button class="btn btn-sm btn-gym-outline"
+                  data-detalle="${r.idRutina}" data-nombre="${limpio(r.nombre)}">
+            <i class="bi bi-list-ul"></i>
+          </button>
+        </td>
+      </tr>`).join('');
+
+    document.getElementById('selectRutina').innerHTML = rutinas.map(r =>
+      `<option value="${r.idRutina}">${limpio(r.nombre)} (${limpio(r.nivel)})</option>`).join('');
+
+  } catch (e) { filaVacia(tbody, 5, e.message); }
+}
+
+document.getElementById('filtroEntrenador').addEventListener('change', cargarRutinas);
+
+document.getElementById('tablaRutinas').addEventListener('click', async (ev) => {
+  const boton = ev.target.closest('[data-detalle]');
+  if (!boton) return;
+
+  const panel = document.getElementById('panelDetalle');
+  panel.classList.remove('d-none');
+  document.getElementById('detalleTitulo').textContent =
+    'Ejercicios de ' + boton.dataset.nombre;
+
+  const tbody = document.getElementById('tablaEjercicios');
+  try {
+    const ejercicios = await api.get(`/rutinas/${boton.dataset.detalle}/ejercicios`);
+    if (!ejercicios.length) return filaVacia(tbody, 5, 'Esta rutina no tiene ejercicios.');
+    tbody.innerHTML = ejercicios.map(e => `
+      <tr>
+        <td>${limpio(e.ejercicio)}</td>
+        <td class="text-secondary">${limpio(e.grupoMuscular) || '\u2014'}</td>
+        <td>${e.series}</td>
+        <td>${e.repeticiones}</td>
+        <td>${e.descansoSegundos}s</td>
+      </tr>`).join('');
+  } catch (e) { filaVacia(tbody, 5, e.message); }
+});
+
+document.getElementById('formRutina').addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const datos = datosDe(ev.target);
+  datos.idEntrenador = Number(datos.idEntrenador);
+  try {
+    await api.post('/rutinas', datos);
+    avisar('Rutina creada.', 'ok');
+    ev.target.reset();
+    cargarRutinas();
+  } catch (e) { avisar(e.message, 'error'); }
+});
+
+document.getElementById('formAsignar').addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const datos = datosDe(ev.target);
+  const idRutina = Number(datos.idRutina);
+  try {
+    await api.post(`/rutinas/${idRutina}/asignar`,
+      { idCliente: Number(datos.idCliente), fechaFin: datos.fechaFin });
+    avisar('Rutina asignada al cliente.', 'ok');
+  } catch (e) { avisar(e.message, 'error'); }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  cargarEntrenadores();
+  cargarClientes();
+});
+</script>
+</body>
+</html>

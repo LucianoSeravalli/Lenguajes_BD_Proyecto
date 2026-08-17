@@ -1,4 +1,4 @@
-package config;
+package lenguajesBD_Grupo06.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

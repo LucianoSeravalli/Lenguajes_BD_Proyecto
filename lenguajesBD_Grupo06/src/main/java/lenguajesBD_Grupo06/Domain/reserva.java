@@ -14,7 +14,7 @@ import java.time.LocalDate;
  */
 @Entity
 @Table(name = "RESERVA")
-@Getter @Setter @NoArgsConstructor
+@Data
 public class Reserva {
  
     @Id

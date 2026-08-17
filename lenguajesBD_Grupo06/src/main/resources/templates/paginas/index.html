@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Cadena nacional de gimnasios')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: headerPublico('')}"></header>
+ 
+<main>
+ 
+  <!-- ================= HERO ================= -->
+  <section class="gym-hero">
+    <div class="container py-5">
+      <div class="row align-items-center g-5 py-4">
+        <div class="col-lg-6">
+          <span class="gym-etiqueta">14 sedes en todo el pais</span>
+          <h1 class="gym-titulo mt-3">
+            Entrena donde estes.<br>
+            <span>Una membresia, todo el pais.</span>
+          </h1>
+          <p class="gym-subtitulo mt-3">
+            GymCore es la cadena de gimnasios mas grande de Costa Rica. Acceso
+            ilimitado a todas nuestras sedes, clases grupales sin costo extra y
+            rutinas disenadas por entrenadores certificados.
+          </p>
+          <div class="d-flex flex-wrap gap-2 mt-4">
+            <a class="btn btn-gym btn-lg" th:href="@{/registro}">
+              <i class="bi bi-person-plus"></i> Empezar ahora
+            </a>
+            <a class="btn btn-gym-outline btn-lg" href="#planes">Ver planes</a>
+          </div>
+          <div class="d-flex flex-wrap gap-4 mt-5">
+            <div><div class="gym-dato">14</div><div class="gym-dato-txt">Sedes</div></div>
+            <div><div class="gym-dato">8 400</div><div class="gym-dato-txt">Miembros</div></div>
+            <div><div class="gym-dato">60+</div><div class="gym-dato-txt">Clases semanales</div></div>
+            <div><div class="gym-dato">24/7</div><div class="gym-dato-txt">Sedes selectas</div></div>
+          </div>
+        </div>
+ 
+        <div class="col-lg-6">
+          <!-- Composicion decorativa con iconos: sustituir por fotos reales
+               colocandolas en /static/img y usando <img th:src="@{/img/...}">. -->
+          <div class="gym-mosaico">
+            <div class="gym-mosaico-celda grande">
+              <i class="bi bi-bicycle"></i><span>Spinning</span>
+            </div>
+            <div class="gym-mosaico-celda">
+              <i class="bi bi-heart-pulse"></i><span>Funcional</span>
+            </div>
+            <div class="gym-mosaico-celda">
+              <i class="bi bi-trophy"></i><span>Pesas</span>
+            </div>
+            <div class="gym-mosaico-celda ancha">
+              <i class="bi bi-person-arms-up"></i><span>Yoga y movilidad</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+ 
+  <!-- ================= SERVICIOS ================= -->
+  <section id="servicios" class="container py-5">
+    <div class="text-center mb-5">
+      <h2 class="h3">Todo incluido en tu membresia</h2>
+      <p class="text-secondary">Sin cargos ocultos ni reservas pagadas aparte.</p>
+    </div>
+ 
+    <div class="row g-3">
+      <div class="col-md-6 col-lg-3">
+        <div class="gym-panel gym-servicio h-100">
+          <i class="bi bi-door-open"></i>
+          <h3>Acceso multisede</h3>
+          <p>Tu huella funciona en las 14 sedes. El sistema valida tu membresia
+             en el torniquete al instante.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="gym-panel gym-servicio h-100">
+          <i class="bi bi-calendar-check"></i>
+          <h3>Clases grupales</h3>
+          <p>Spinning, funcional, yoga y baile. Reserva tu cupo desde la app
+             y libera el espacio si no vas a llegar.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="gym-panel gym-servicio h-100">
+          <i class="bi bi-clipboard-pulse"></i>
+          <h3>Rutinas personalizadas</h3>
+          <p>Un entrenador te arma el plan segun tu nivel y tus objetivos, y lo
+             ajusta cada mes.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="gym-panel gym-servicio h-100">
+          <i class="bi bi-graph-up-arrow"></i>
+          <h3>Seguimiento</h3>
+          <p>Historial de asistencia, progreso por ejercicio y estado de tu
+             membresia siempre a mano.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+ 
+  <!-- ================= PLANES ================= -->
+  <section id="planes" class="gym-franja py-5">
+    <div class="container">
+      <div class="text-center mb-5">
+        <h2 class="h3">Planes</h2>
+        <p class="text-secondary">Precios en colones. Sin matricula durante agosto.</p>
+      </div>
+ 
+      <div class="row g-3 justify-content-center">
+        <div class="col-md-6 col-lg-4">
+          <div class="gym-panel gym-plan h-100">
+            <h3>Mensual</h3>
+            <div class="gym-precio">&cent;25 000<span>/mes</span></div>
+            <ul>
+              <li><i class="bi bi-check2"></i> Sala de pesas y cardio</li>
+              <li><i class="bi bi-check2"></i> Acceso a tu sede</li>
+              <li><i class="bi bi-check2"></i> Evaluacion inicial</li>
+              <li class="apagado"><i class="bi bi-x"></i> Clases grupales</li>
+            </ul>
+            <a class="btn btn-gym-outline w-100" th:href="@{/registro}">Elegir</a>
+          </div>
+        </div>
+ 
+        <div class="col-md-6 col-lg-4">
+          <div class="gym-panel gym-plan destacado h-100">
+            <span class="gym-cinta">Mas elegido</span>
+            <h3>Trimestral</h3>
+            <div class="gym-precio">&cent;65 000<span>/3 meses</span></div>
+            <ul>
+              <li><i class="bi bi-check2"></i> Acceso completo multisede</li>
+              <li><i class="bi bi-check2"></i> Clases grupales ilimitadas</li>
+              <li><i class="bi bi-check2"></i> Rutina personalizada</li>
+              <li><i class="bi bi-check2"></i> Ahorro de &cent;10 000</li>
+            </ul>
+            <a class="btn btn-gym w-100" th:href="@{/registro}">Elegir</a>
+          </div>
+        </div>
+ 
+        <div class="col-md-6 col-lg-4">
+          <div class="gym-panel gym-plan h-100">
+            <h3>Anual</h3>
+            <div class="gym-precio">&cent;225 000<span>/ano</span></div>
+            <ul>
+              <li><i class="bi bi-check2"></i> Todo lo del trimestral</li>
+              <li><i class="bi bi-check2"></i> Sedes 24/7</li>
+              <li><i class="bi bi-check2"></i> Dos invitados al mes</li>
+              <li><i class="bi bi-check2"></i> Congelamiento por 30 dias</li>
+            </ul>
+            <a class="btn btn-gym-outline w-100" th:href="@{/registro}">Elegir</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+ 
+  <!-- ================= SEDES ================= -->
+  <section id="sedes" class="container py-5">
+    <div class="text-center mb-5">
+      <h2 class="h3">Nuestras sedes</h2>
+      <p class="text-secondary">De Guanacaste a Limon, tu membresia funciona igual.</p>
+    </div>
+ 
+    <div class="row g-3">
+      <div class="col-6 col-md-4 col-lg-3" th:each="sede : ${sedes}">
+        <div class="gym-panel gym-sede">
+          <i class="bi bi-geo-alt-fill"></i>
+          <div>
+            <strong th:text="${sede.nombre}">Sede</strong>
+            <span th:text="${sede.horario}">Horario</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+ 
+  <!-- ================= CONTACTO ================= -->
+  <section id="contacto" class="gym-franja py-5">
+    <div class="container">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+          <h2 class="h3">Visita una sede antes de decidir</h2>
+          <p class="text-secondary mb-4">
+            Agenda un dia de prueba sin costo. Un entrenador te acompana en el
+            recorrido y te arma una rutina de arranque.
+          </p>
+          <div class="d-flex flex-wrap gap-4">
+            <div><i class="bi bi-telephone me-2"></i>2000-0000</div>
+            <div><i class="bi bi-envelope me-2"></i>info@gymcore.cr</div>
+            <div><i class="bi bi-clock me-2"></i>Lun a Sab, 5 a.m. &ndash; 10 p.m.</div>
+          </div>
+        </div>
+        <div class="col-lg-5 text-lg-end">
+          <a class="btn btn-gym btn-lg" th:href="@{/registro}">
+            <i class="bi bi-person-plus"></i> Crear mi cuenta
+          </a>
+          <p class="text-secondary small mt-3 mb-0">
+            &iquest;Personal del gimnasio?
+            <a th:href="@{/login}">Ingresar al panel administrativo</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+ 
+</main>
+ 
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>
+ 

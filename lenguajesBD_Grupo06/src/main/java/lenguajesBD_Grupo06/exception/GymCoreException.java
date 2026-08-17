@@ -1,4 +1,4 @@
-package exception;
+package lenguajesBD_Grupo06.exception;
 
 /**
  * Envuelve los errores de negocio que lanzan los procedimientos PL/SQL

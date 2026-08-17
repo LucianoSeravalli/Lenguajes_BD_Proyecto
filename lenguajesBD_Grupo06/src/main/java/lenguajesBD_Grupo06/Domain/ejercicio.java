@@ -6,7 +6,7 @@ import lombok.*;
  
 @Entity
 @Table(name = "EJERCICIO")
-@Getter @Setter @NoArgsConstructor
+@Data
 public class Ejercicio {
  
     @Id

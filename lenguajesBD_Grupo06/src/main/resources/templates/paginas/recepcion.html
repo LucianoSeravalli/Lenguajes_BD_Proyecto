@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Recepcion')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header('recepcion')}"></header>
+<div th:replace="~{fragments/layout :: avisos}"></div>
+
+<main class="container-fluid px-4 py-4">
+
+  <h1 class="h4 mb-1">Control de acceso</h1>
+  <p class="text-secondary mb-4">
+    La decision la toma <code>FN_MEMBRESIA_ACTIVA</code>: membresia vigente,
+    con pago completado y sin pagos pendientes. Todo intento queda en bitacora.
+  </p>
+
+  <div class="row g-3">
+    <div class="col-lg-5">
+      <section class="gym-panel">
+        <div class="gym-panel-cabecera"><i class="bi bi-upc-scan me-2"></i>Marcar cedula</div>
+        <div class="gym-panel-cuerpo">
+
+          <form id="formAcceso" autocomplete="off">
+            <label class="form-label" for="cedula">Cedula del cliente</label>
+            <input class="form-control form-control-lg mb-3" id="cedula" name="cedula"
+                   placeholder="1-1111-1111" required autofocus>
+
+            <div class="d-grid gap-2">
+              <button class="btn btn-gym btn-lg" type="submit" data-tipo="entrada">
+                <i class="bi bi-box-arrow-in-right"></i> Registrar entrada
+              </button>
+              <button class="btn btn-gym-outline" type="button" id="btnSalida">
+                <i class="bi bi-box-arrow-right"></i> Registrar salida
+              </button>
+              <button class="btn btn-gym-outline" type="button" id="btnVerificar">
+                <i class="bi bi-search"></i> Solo verificar (no registra)
+              </button>
+            </div>
+          </form>
+
+          <div class="gym-torniquete mt-4" id="torniquete">
+            <i class="bi bi-person-badge"></i>
+            <div class="mt-2" id="torniqueteTexto">Esperando cedula...</div>
+          </div>
+
+        </div>
+      </section>
+    </div>
+
+    <div class="col-lg-7">
+      <section class="gym-panel">
+        <div class="gym-panel-cabecera">
+          <span><i class="bi bi-list-check me-2"></i>Bitacora del dia</span>
+          <button class="btn btn-sm btn-gym-outline" id="btnRefrescar">
+            <i class="bi bi-arrow-clockwise"></i>
+          </button>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-borderless mb-0">
+            <thead><tr><th>Hora</th><th>Cliente</th><th>Tipo</th><th>Resultado</th></tr></thead>
+            <tbody id="tablaBitacora"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </div>
+
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+
+<script>
+const torniquete = document.getElementById('torniquete');
+const torniqueteTexto = document.getElementById('torniqueteTexto');
+const campoCedula = document.getElementById('cedula');
+
+function pintarTorniquete(permitido, mensaje) {
+  torniquete.className = 'gym-torniquete mt-4 ' + (permitido ? 'permitido' : 'denegado');
+  torniquete.querySelector('.bi').className =
+    'bi bi-' + (permitido ? 'check-circle-fill' : 'x-octagon-fill');
+  torniqueteTexto.textContent = mensaje;
+}
+
+async function marcar(ruta) {
+  const cedula = campoCedula.value.trim();
+  if (!cedula) return avisar('Digite la cedula.', 'error');
+
+  try {
+    const r = await api.post(ruta, { cedula });
+    pintarTorniquete(r.permitido, r.mensaje);
+    avisar(r.mensaje, r.permitido ? 'ok' : 'error');
+    campoCedula.value = '';
+    campoCedula.focus();
+    cargarBitacora();
+  } catch (e) {
+    // 20009: la cedula no corresponde a ningun cliente.
+    pintarTorniquete(false, e.message);
+    avisar(e.message, 'error');
+  }
+}
+
+document.getElementById('formAcceso').addEventListener('submit', (ev) => {
+  ev.preventDefault();
+  marcar('/accesos/entrada');
+});
+
+document.getElementById('btnSalida').addEventListener('click', () => marcar('/accesos/salida'));
+
+document.getElementById('btnVerificar').addEventListener('click', async () => {
+  const cedula = campoCedula.value.trim();
+  if (!cedula) return avisar('Digite la cedula.', 'error');
+  try {
+    const r = await api.get('/accesos/verificar/' + encodeURIComponent(cedula));
+    pintarTorniquete(r.permitido, r.mensaje);
+  } catch (e) { avisar(e.message, 'error'); }
+});
+
+async function cargarBitacora() {
+  const tbody = document.getElementById('tablaBitacora');
+  try {
+    const accesos = await api.get('/accesos/dia');
+    if (!accesos.length) return filaVacia(tbody, 4, 'Sin movimientos hoy.');
+    tbody.innerHTML = accesos.map(a => `
+      <tr>
+        <td>${fechaHora(a.fechaHora)}</td>
+        <td>${limpio(a.cliente)}</td>
+        <td>${limpio(a.tipo)}</td>
+        <td>${chip(a.resultado)}</td>
+      </tr>`).join('');
+  } catch (e) { filaVacia(tbody, 4, e.message); }
+}
+
+document.getElementById('btnRefrescar').addEventListener('click', cargarBitacora);
+document.addEventListener('DOMContentLoaded', cargarBitacora);
+</script>
+</body>
+</html>

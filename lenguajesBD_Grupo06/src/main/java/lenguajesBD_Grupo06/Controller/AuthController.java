@@ -1,10 +1,12 @@
 package lenguajesBD_Grupo06.Controller;
 
+
+import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lenguajesBD_Grupo06.Domain.Usuario;
 import lenguajesBD_Grupo06.Service.UsuarioService;
 import lenguajesBD_Grupo06.web.dto.Requests;
 import lenguajesBD_Grupo06.web.dto.Responses;
-import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,27 +17,25 @@ import java.util.List;
 @RequestMapping("/api/auth")
 public class AuthController {
  
+    /** Rol que habilita el panel administrativo. */
+    private static final String ROL_PANEL = "ADMINISTRADOR";
+ 
     private final UsuarioService usuarioService;
  
     public AuthController(UsuarioService usuarioService) {
         this.usuarioService = usuarioService;
     }
  
-    /**
-     * Devuelve 201 sin el token: el enlace de confirmacion viaja por correo.
-     * Exponerlo en la respuesta permitiria activar cuentas ajenas.
-     */
     @PostMapping("/registro/cliente")
     public ResponseEntity<Responses.Mensaje> registrarCliente(
             @Valid @RequestBody Requests.RegistroCliente req) {
  
-        String token = usuarioService.registrarCliente(req.nombre(), req.apellido(),
+        usuarioService.registrarCliente(req.nombre(), req.apellido(),
                 req.telefono(), req.correo(), req.password(), req.cedula(),
                 req.fechaNacimiento());
  
-        // TODO: enviar el token por correo con el enlace /api/auth/confirmar?token=...
         return ResponseEntity.status(HttpStatus.CREATED).body(new Responses.Mensaje(
-                "Cuenta creada. Revise su correo para confirmarla."));
+                "Cuenta creada correctamente."));
     }
  
     @PostMapping("/registro/entrenador")
@@ -56,9 +56,33 @@ public class AuthController {
         return new Responses.Mensaje("Correo confirmado. Ya puede iniciar sesion.");
     }
  
+    /**
+     * Valida credenciales y abre la sesion. Solo quien tenga el rol
+     * ADMINISTRADOR queda habilitado para el panel; un cliente puede
+     * autenticarse pero recibe 403.
+     */
     @PostMapping("/login")
-    public Responses.UsuarioDto login(@Valid @RequestBody Requests.Login req) {
-        return Responses.UsuarioDto.de(usuarioService.autenticar(req.correo(), req.password()));
+    public Responses.UsuarioDto login(@Valid @RequestBody Requests.Login req,
+                                      HttpSession sesion) {
+ 
+        Usuario usuario = usuarioService.autenticar(req.correo(), req.password());
+ 
+        if (!usuarioService.tieneRol(usuario.getIdUsuario(), ROL_PANEL)) {
+            throw new lenguajesBD_Grupo06.exception.GymCoreException(20013,
+                    "Su cuenta no tiene permisos para el panel administrativo.");
+        }
+ 
+        sesion.setAttribute("usuarioId", usuario.getIdUsuario());
+        sesion.setAttribute("usuarioNombre", usuario.getNombreCompleto());
+        sesion.setAttribute("esAdministrador", Boolean.TRUE);
+ 
+        return Responses.UsuarioDto.de(usuario);
+    }
+ 
+    @PostMapping("/logout")
+    public Responses.Mensaje logout(HttpSession sesion) {
+        sesion.invalidate();
+        return new Responses.Mensaje("Sesion cerrada.");
     }
  
     @GetMapping("/entrenadores")
@@ -68,4 +92,3 @@ public class AuthController {
                 .toList();
     }
 }
- 

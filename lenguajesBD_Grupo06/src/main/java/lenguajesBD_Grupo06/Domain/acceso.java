@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 /** Bitacora de entradas y salidas al gimnasio. */
 @Entity
 @Table(name = "ACCESO")
-@Getter @Setter @NoArgsConstructor
+@Data
 public class Acceso {
  
     @Id

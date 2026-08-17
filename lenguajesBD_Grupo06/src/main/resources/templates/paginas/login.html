@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Ingresar')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header('')}"></header>
+<div th:replace="~{fragments/layout :: avisos}"></div>
+
+<main class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+
+      <section class="gym-panel">
+        <div class="gym-panel-cabecera">
+          <span><i class="bi bi-box-arrow-in-right me-2"></i>Ingresar a GymCore</span>
+        </div>
+        <div class="gym-panel-cuerpo">
+          <form id="formLogin" autocomplete="off">
+            <label class="form-label">Correo</label>
+            <input class="form-control mb-3" type="email" name="correo" required autofocus>
+
+            <label class="form-label">Contrasena</label>
+            <input class="form-control mb-4" type="password" name="password" required>
+
+            <button class="btn btn-gym w-100" type="submit">Entrar</button>
+          </form>
+
+          <p class="text-secondary small mt-4 mb-0">
+            La contrasena viaja al backend y se compara contra el hash BCrypt
+            guardado en <code>PASSWORD_HASH</code>. Las cuentas de prueba del
+            script 05 tienen un hash centinela que no permite iniciar sesion.
+          </p>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+
+<script>
+document.getElementById('formLogin').addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  try {
+    const usuario = await api.post('/auth/login', datosDe(ev.target));
+    avisar(`Bienvenido, ${usuario.nombre}.`, 'ok');
+    setTimeout(() => window.location.href = '/panel', 900);
+  } catch (e) { avisar(e.message, 'error'); }
+});
+</script>
+</body>
+</html>
