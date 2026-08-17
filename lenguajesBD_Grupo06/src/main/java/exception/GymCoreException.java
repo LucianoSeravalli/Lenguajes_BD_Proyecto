@@ -1,5 +1,10 @@
 package exception;
 
+
+
+
+
+
 /**
  * Envuelve los errores de negocio que lanzan los procedimientos PL/SQL
  * con RAISE_APPLICATION_ERROR, para que la capa web no tenga que leer
