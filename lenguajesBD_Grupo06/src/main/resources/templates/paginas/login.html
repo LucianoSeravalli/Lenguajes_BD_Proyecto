@@ -2,7 +2,7 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head('Ingresar')}"></head>
 <body>
-<header th:replace="~{fragments/layout :: header('')}"></header>
+<header th:replace="~{fragments/layout :: headerPublico('')}"></header>
 <div th:replace="~{fragments/layout :: avisos}"></div>
 
 <main class="container py-5">
@@ -25,9 +25,7 @@
           </form>
 
           <p class="text-secondary small mt-4 mb-0">
-            La contrasena viaja al backend y se compara contra el hash BCrypt
-            guardado en <code>PASSWORD_HASH</code>. Las cuentas de prueba del
-            script 05 tienen un hash centinela que no permite iniciar sesion.
+            Ingresa con el correo y la contrasena registrados para acceder al panel administrativo.
           </p>
         </div>
       </section>

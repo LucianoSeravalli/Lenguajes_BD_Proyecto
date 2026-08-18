@@ -9,8 +9,7 @@
 
   <h1 class="h4 mb-1">Rutinas de entrenamiento</h1>
   <p class="text-secondary mb-4">
-    Solo usuarios con rol ENTRENADOR activo pueden crear rutinas: lo valida
-    <code>TRG_RUTINA_VALIDAR_ENTRENADOR</code>.
+    Crea rutinas por entrenador y asigna planes de entrenamiento a cada cliente.
   </p>
 
   <div class="row g-3">
@@ -64,19 +63,8 @@
         </div>
         <div class="table-responsive">
           <table class="table table-borderless mb-0">
-            <thead><tr><th>#</th><th>Nombre</th><th>Nivel</th><th>Entrenador</th><th></th></tr></thead>
+            <thead><tr><th>#</th><th>Nombre</th><th>Nivel</th><th>Entrenador</th></tr></thead>
             <tbody id="tablaRutinas"></tbody>
-          </table>
-        </div>
-        <div class="gym-panel-cuerpo border-top d-none" id="panelDetalle"
-             style="border-color: var(--gym-borde) !important;">
-          <h6 class="mb-3" id="detalleTitulo">Ejercicios</h6>
-          <table class="table table-borderless mb-0">
-            <thead>
-              <tr><th>Ejercicio</th><th>Grupo</th><th>Series</th>
-                  <th>Reps</th><th>Descanso</th></tr>
-            </thead>
-            <tbody id="tablaEjercicios"></tbody>
           </table>
         </div>
       </section>
@@ -113,13 +101,13 @@ async function cargarClientes() {
 async function cargarRutinas() {
   const id = document.getElementById('filtroEntrenador').value;
   const tbody = document.getElementById('tablaRutinas');
-  if (!id) return filaVacia(tbody, 5, 'Seleccione un entrenador.');
+  if (!id) return filaVacia(tbody, 4, 'Seleccione un entrenador.');
 
   try {
     const rutinas = await api.get('/rutinas/entrenador/' + id);
     if (!rutinas.length) {
       document.getElementById('selectRutina').innerHTML = '<option value="">Sin rutinas</option>';
-      return filaVacia(tbody, 5, 'Este entrenador no tiene rutinas.');
+      return filaVacia(tbody, 4, 'Este entrenador no tiene rutinas.');
     }
 
     tbody.innerHTML = rutinas.map(r => `
@@ -128,45 +116,16 @@ async function cargarRutinas() {
         <td>${limpio(r.nombre)}</td>
         <td class="text-capitalize">${limpio(r.nivel)}</td>
         <td class="text-secondary">${limpio(r.entrenador)}</td>
-        <td class="text-end">
-          <button class="btn btn-sm btn-gym-outline"
-                  data-detalle="${r.idRutina}" data-nombre="${limpio(r.nombre)}">
-            <i class="bi bi-list-ul"></i>
-          </button>
-        </td>
       </tr>`).join('');
 
     document.getElementById('selectRutina').innerHTML = rutinas.map(r =>
       `<option value="${r.idRutina}">${limpio(r.nombre)} (${limpio(r.nivel)})</option>`).join('');
 
-  } catch (e) { filaVacia(tbody, 5, e.message); }
+  } catch (e) { filaVacia(tbody, 4, e.message); }
 }
 
 document.getElementById('filtroEntrenador').addEventListener('change', cargarRutinas);
 
-document.getElementById('tablaRutinas').addEventListener('click', async (ev) => {
-  const boton = ev.target.closest('[data-detalle]');
-  if (!boton) return;
-
-  const panel = document.getElementById('panelDetalle');
-  panel.classList.remove('d-none');
-  document.getElementById('detalleTitulo').textContent =
-    'Ejercicios de ' + boton.dataset.nombre;
-
-  const tbody = document.getElementById('tablaEjercicios');
-  try {
-    const ejercicios = await api.get(`/rutinas/${boton.dataset.detalle}/ejercicios`);
-    if (!ejercicios.length) return filaVacia(tbody, 5, 'Esta rutina no tiene ejercicios.');
-    tbody.innerHTML = ejercicios.map(e => `
-      <tr>
-        <td>${limpio(e.ejercicio)}</td>
-        <td class="text-secondary">${limpio(e.grupoMuscular) || '\u2014'}</td>
-        <td>${e.series}</td>
-        <td>${e.repeticiones}</td>
-        <td>${e.descansoSegundos}s</td>
-      </tr>`).join('');
-  } catch (e) { filaVacia(tbody, 5, e.message); }
-});
 
 document.getElementById('formRutina').addEventListener('submit', async (ev) => {
   ev.preventDefault();

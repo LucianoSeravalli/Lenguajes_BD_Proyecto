@@ -58,8 +58,11 @@ function avisar(mensaje, tipo = 'info') {
  
 /* ---------------- Utilidades de render ---------------- */
  
-const chip = (valor) =>
-  valor ? `<span class="gym-chip ${valor}">${valor}</span>` : '';
+const chip = (valor) => {
+  if (!valor) return '';
+  const clase = String(valor).trim().toLowerCase().replace(/[^a-z0-9_-]+/g, '-');
+  return `<span class="gym-chip ${clase}">${limpio(valor)}</span>`;
+};
  
 const fecha = (iso) =>
   iso ? new Date(iso).toLocaleDateString('es-CR') : '\u2014';
@@ -79,7 +82,7 @@ const limpio = (texto) => {
  
 function filaVacia(tbody, columnas, mensaje = 'Sin registros.') {
   tbody.innerHTML =
-    `<tr><td colspan="${columnas}" class="gym-vacio">${mensaje}</td></tr>`;
+    `<tr><td colspan="${columnas}" class="gym-vacio">${limpio(mensaje)}</td></tr>`;
 }
  
 /** Lee un formulario y devuelve un objeto, con los vacios como null. */
@@ -111,4 +114,3 @@ async function revisarConexion() {
 }
  
 document.addEventListener('DOMContentLoaded', revisarConexion);
- 

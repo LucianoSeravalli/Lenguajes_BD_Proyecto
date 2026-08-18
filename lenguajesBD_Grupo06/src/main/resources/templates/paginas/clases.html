@@ -11,8 +11,7 @@
     <div>
       <h1 class="h4 mb-1">Clases y reservas</h1>
       <p class="text-secondary mb-0">
-        Las reservas pasan por <code>SP_RESERVAR_CLASE</code>, que bloquea la clase
-        para evitar sobre-reservas simultaneas.
+        Administra horarios, entrenadores y cupos disponibles para cada clase.
       </p>
     </div>
     <button class="btn btn-gym" data-bs-toggle="modal" data-bs-target="#modalClase">
@@ -54,8 +53,7 @@
 
           <hr class="my-4" style="border-color: var(--gym-borde)">
           <p class="text-secondary small mb-0">
-            Si el cliente no tiene membresia al dia responde 409 con el mensaje
-            del error ORA-20002. Cupo lleno: ORA-20004. Reserva repetida: ORA-20005.
+            Verifica que el cliente tenga membresia activa antes de confirmar la reserva.
           </p>
         </div>
       </section>

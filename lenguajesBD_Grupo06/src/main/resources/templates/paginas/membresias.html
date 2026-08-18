@@ -9,8 +9,7 @@
 
   <h1 class="h4 mb-1">Membresias y pagos</h1>
   <p class="text-secondary mb-4">
-    El estado de la membresia lo mantienen los triggers: registrar un pago
-    pendiente la marca vencida hasta que se complete.
+    Administra planes, contratos y pagos de membresias desde una sola vista.
   </p>
 
   <div class="row g-3">
@@ -74,26 +73,6 @@
           </table>
         </div>
       </section>
-
-      <section class="gym-panel">
-        <div class="gym-panel-cabecera">
-          <span><i class="bi bi-hourglass-split me-2"></i>Por vencer</span>
-          <select class="form-select form-select-sm w-auto" id="selectDias">
-            <option value="7">7 dias</option>
-            <option value="15">15 dias</option>
-            <option value="30">30 dias</option>
-          </select>
-        </div>
-        <div class="table-responsive">
-          <table class="table table-borderless mb-0">
-            <thead>
-              <tr><th>#</th><th>Cliente</th><th>Tipo</th><th>Vence</th>
-                  <th>Estado</th><th></th></tr>
-            </thead>
-            <tbody id="tablaPorVencer"></tbody>
-          </table>
-        </div>
-      </section>
     </div>
   </div>
 
@@ -129,39 +108,6 @@ async function cargarClientes() {
   } catch (e) { avisar(e.message, 'error'); }
 }
 
-async function cargarPorVencer() {
-  const dias = document.getElementById('selectDias').value;
-  const tbody = document.getElementById('tablaPorVencer');
-  try {
-    const lista = await api.get('/membresias/por-vencer?dias=' + dias);
-    if (!lista.length) return filaVacia(tbody, 6, 'Ninguna vence en ese plazo.');
-    tbody.innerHTML = lista.map(m => `
-      <tr>
-        <td class="text-secondary">${m.idMembresia}</td>
-        <td>#${m.idCliente}</td>
-        <td>${limpio(m.tipo)}</td>
-        <td>${fecha(m.fechaFin)}</td>
-        <td>${chip(m.estado)}</td>
-        <td class="text-end">
-          <button class="btn btn-sm btn-gym-outline" data-renovar="${m.idMembresia}">
-            Renovar
-          </button>
-        </td>
-      </tr>`).join('');
-  } catch (e) { filaVacia(tbody, 6, e.message); }
-}
-
-document.getElementById('selectDias').addEventListener('change', cargarPorVencer);
-
-document.getElementById('tablaPorVencer').addEventListener('click', async (ev) => {
-  const boton = ev.target.closest('[data-renovar]');
-  if (!boton) return;
-  try {
-    const m = await api.post(`/membresias/${boton.dataset.renovar}/renovar`, {});
-    avisar(`Renovada hasta ${fecha(m.fechaFin)}.`, 'ok');
-    cargarPorVencer();
-  } catch (e) { avisar(e.message, 'error'); }
-});
 
 document.getElementById('formMembresia').addEventListener('submit', async (ev) => {
   ev.preventDefault();
@@ -171,7 +117,6 @@ document.getElementById('formMembresia').addEventListener('submit', async (ev) =
   try {
     const m = await api.post('/membresias', datos);
     avisar(`Membresia #${m.idMembresia} creada, vence ${fecha(m.fechaFin)}.`, 'ok');
-    cargarPorVencer();
   } catch (e) { avisar(e.message, 'error'); }
 });
 
@@ -184,14 +129,12 @@ document.getElementById('formPago').addEventListener('submit', async (ev) => {
     const r = await api.post('/pagos', datos);
     avisar(r.mensaje, 'ok');
     ev.target.reset();
-    cargarPorVencer();
   } catch (e) { avisar(e.message, 'error'); }
 });
 
 document.addEventListener('DOMContentLoaded', () => {
   cargarTipos();
   cargarClientes();
-  cargarPorVencer();
 });
 </script>
 </body>
